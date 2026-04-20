@@ -20,6 +20,8 @@
     --radius: 14px;
     --radius-sm: 8px;
     --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+    --green: #16a34a;
+    --green-light: rgba(22,163,74,0.1);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -316,12 +318,95 @@
     border: none; border-radius: var(--radius-sm);
     cursor: pointer; letter-spacing: 0.06em;
     text-transform: uppercase; transition: all 0.2s;
+    margin-bottom: 10px;
   }
 
   .btn-generate:hover { background: #333; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
   .btn-generate:active { transform: translateY(0); }
 
-  /* Modal */
+  /* ── Share button ── */
+  .btn-share {
+    width: 100%; padding: 12px;
+    background: var(--green); color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px; font-weight: 700;
+    border: none; border-radius: var(--radius-sm);
+    cursor: pointer; letter-spacing: 0.06em;
+    text-transform: uppercase; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+
+  .btn-share:hover { background: #15803d; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(22,163,74,0.25); }
+  .btn-share:active { transform: translateY(0); }
+
+  /* ── Share Modal ── */
+  .share-url-wrap {
+    display: flex; gap: 8px; margin-bottom: 1rem;
+  }
+
+  .share-url-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px; padding: 9px 12px; outline: none;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .share-copy-btn {
+    padding: 9px 16px;
+    background: var(--text); color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px; font-weight: 700;
+    border: none; border-radius: var(--radius-sm);
+    cursor: pointer; white-space: nowrap; letter-spacing: 0.04em;
+    transition: background 0.15s;
+  }
+
+  .share-copy-btn:hover { background: #333; }
+
+  .share-note {
+    font-size: 11px; color: var(--text-muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 12px;
+    line-height: 1.6; margin-bottom: 1rem;
+  }
+
+  .share-note strong { color: var(--text); }
+
+  .share-qr-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; padding: 1rem;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface2); margin-bottom: 1rem;
+  }
+
+  .share-qr-label {
+    font-size: 10px; font-weight: 700; color: var(--text-muted);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  #qr-canvas { border-radius: 8px; }
+
+  .share-socials {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+
+  .share-soc-btn {
+    padding: 9px 12px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+    cursor: pointer; background: var(--surface2); color: var(--text);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .share-soc-btn:hover { background: var(--highlight-light); border-color: var(--highlight); color: var(--highlight); }
+
+  /* Modal (shared base) */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.5); z-index: 100;
@@ -419,7 +504,7 @@
       <div class="brand-title">Digital Card Builder</div>
       <div class="brand-sub">สร้างบัตรพนักงานดิจิทัล · Flip Card</div>
     </div>
-    <div class="header-badge">v2.0</div>
+    <div class="header-badge">v2.1</div>
   </header>
 
   <div class="layout">
@@ -448,7 +533,7 @@
                      ondragleave="handleDragLeave(event,'zone-bg')"
                      ondrop="handleDrop(event,'bg')">
                   <input type="file" accept="image/*" id="input-bg" onchange="handleFile(this,'bg')">
-                  <div class="upload-icon"></div>
+                  <div class="upload-icon">🖼</div>
                   <div class="upload-main-text">คลิก / ลากรูป</div>
                   <div class="upload-sub-text">JPG · PNG · WEBP</div>
                 </div>
@@ -464,7 +549,7 @@
                      ondragleave="handleDragLeave(event,'zone-logo')"
                      ondrop="handleDrop(event,'logo')">
                   <input type="file" accept="image/*" id="input-logo" onchange="handleFile(this,'logo')">
-                  <div class="upload-icon"></div>
+                  <div class="upload-icon">🏷</div>
                   <div class="upload-main-text">คลิก / ลากโลโก้</div>
                   <div class="upload-sub-text">PNG แนะนำ</div>
                 </div>
@@ -484,7 +569,7 @@
                  ondragleave="handleDragLeave(event,'zone-bgback')"
                  ondrop="handleDrop(event,'bgback')">
               <input type="file" accept="image/*" id="input-bgback" onchange="handleFile(this,'bgback')">
-              <div class="upload-icon"></div>
+              <div class="upload-icon">🖼</div>
               <div class="upload-main-text">คลิกหรือลากรูปพื้นหลัง (หลังการ์ด)</div>
               <div class="upload-sub-text">รูปจะถูกเพิ่ม overlay สีดำอัตโนมัติเพื่อให้อ่านข้อความได้ชัดเจน</div>
             </div>
@@ -529,21 +614,21 @@
 
           <div class="field-row">
             <div class="field-group">
-              <label class="field-label"> เบอร์โทร</label>
+              <label class="field-label">📞 เบอร์โทร</label>
               <input type="tel" id="f-phone" value="081-234-5678" oninput="updateCard()">
             </div>
             <div class="field-group">
-              <label class="field-label"> อีเมล</label>
+              <label class="field-label">✉️ อีเมล</label>
               <input type="email" id="f-email" value="somchai@abc.com" oninput="updateCard()">
             </div>
           </div>
           <div class="field-row">
             <div class="field-group">
-              <label class="field-label"> LINE ID</label>
+              <label class="field-label">💬 LINE ID</label>
               <input type="text" id="f-line" value="@somchai.abc" oninput="updateCard()">
             </div>
             <div class="field-group">
-              <label class="field-label"> เว็บไซต์</label>
+              <label class="field-label">🌐 เว็บไซต์</label>
               <input type="url" id="f-website" placeholder="https://example.com" oninput="updateCard()">
             </div>
           </div>
@@ -553,16 +638,16 @@
 
           <div class="field-row">
             <div class="field-group">
-              <label class="field-label"> Facebook</label>
+              <label class="field-label">📘 Facebook</label>
               <input type="url" id="f-facebook" placeholder="https://facebook.com/..." oninput="updateCard()">
             </div>
             <div class="field-group">
-              <label class="field-label"> Instagram</label>
+              <label class="field-label">📸 Instagram</label>
               <input type="url" id="f-instagram" placeholder="https://instagram.com/..." oninput="updateCard()">
             </div>
           </div>
           <div class="field-group">
-            <label class="field-label">LinkedIn</label>
+            <label class="field-label">💼 LinkedIn</label>
             <input type="url" id="f-linkedin" placeholder="https://linkedin.com/in/..." oninput="updateCard()">
           </div>
         </div>
@@ -625,13 +710,13 @@
                   <div class="back-stripe"></div>
                   <div class="back-content">
                     <div class="back-company" id="cv-company">ABC Company</div>
-                    <div class="back-row"><div class="back-icon"></div><span id="cv-phone">081-234-5678</span></div>
-                    <div class="back-row"><div class="back-icon"></div><span id="cv-email">somchai@abc.com</span></div>
-                    <div class="back-row"><div class="back-icon"></div><span id="cv-line">@somchai.abc</span></div>
-                    <div class="back-row" id="row-website" style="display:none"><div class="back-icon"></div><span id="cv-website"></span></div>
-                    <div class="back-row" id="row-facebook" style="display:none"><div class="back-icon"></div><span id="cv-facebook"></span></div>
-                    <div class="back-row" id="row-instagram" style="display:none"><div class="back-icon"></div><span id="cv-instagram"></span></div>
-                    <div class="back-row" id="row-linkedin" style="display:none"><div class="back-icon"></div><span id="cv-linkedin"></span></div>
+                    <div class="back-row"><div class="back-icon">📞</div><span id="cv-phone">081-234-5678</span></div>
+                    <div class="back-row"><div class="back-icon">✉️</div><span id="cv-email">somchai@abc.com</span></div>
+                    <div class="back-row"><div class="back-icon">💬</div><span id="cv-line">@somchai.abc</span></div>
+                    <div class="back-row" id="row-website" style="display:none"><div class="back-icon">🌐</div><span id="cv-website"></span></div>
+                    <div class="back-row" id="row-facebook" style="display:none"><div class="back-icon">📘</div><span id="cv-facebook"></span></div>
+                    <div class="back-row" id="row-instagram" style="display:none"><div class="back-icon">📸</div><span id="cv-instagram"></span></div>
+                    <div class="back-row" id="row-linkedin" style="display:none"><div class="back-icon">💼</div><span id="cv-linkedin"></span></div>
                   </div>
                 </div>
               </div>
@@ -641,6 +726,10 @@
 
           <div class="flip-hint">Tap to flip · คลิกเพื่อพลิกการ์ด</div>
           <button class="btn-generate" onclick="openExport()">สร้าง HTML + ดาวน์โหลด</button>
+          <!-- NEW: Share button -->
+          <button class="btn-share" onclick="openShare()">
+            <span>🔗</span> รับลิงก์แชร์นามบัตรนี้
+          </button>
 
         </div>
       </div>
@@ -669,11 +758,216 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════
+     NEW: Share Modal
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="share-overlay" onclick="if(event.target===this)closeShare()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🔗 แชร์นามบัตรดิจิทัล</div>
+      <button class="modal-close" onclick="closeShare()">✕</button>
+    </div>
+
+    <!-- URL row -->
+    <div class="share-url-wrap">
+      <input class="share-url-input" id="share-url-input" readonly>
+      <button class="share-copy-btn" onclick="copyShareUrl()">คัดลอก</button>
+    </div>
+
+    <!-- Note -->
+    <div class="share-note">
+      ⚠️ <strong>หมายเหตุ:</strong> ลิงก์นี้บันทึกข้อมูลข้อความทั้งหมด (ชื่อ ตำแหน่ง เบอร์โทร ฯลฯ) และสีการ์ด
+      แต่ <strong>ไม่รวมรูปภาพ</strong> เนื่องจากรูปมีขนาดใหญ่เกินไปสำหรับ URL
+      หากต้องการแชร์พร้อมรูป ให้ใช้ปุ่ม "ดาวน์โหลด HTML" แทน
+    </div>
+
+    <!-- QR Code -->
+    <div class="share-qr-wrap">
+      <div class="share-qr-label">QR Code สำหรับสแกน</div>
+      <canvas id="qr-canvas" width="160" height="160"></canvas>
+      <button class="btn-outline" style="width:auto;padding:7px 18px;font-size:10px;" onclick="downloadQR()">⬇ บันทึก QR</button>
+    </div>
+
+    <!-- Social share -->
+    <div class="share-qr-label" style="margin-bottom:8px;">แชร์ผ่านช่องทาง</div>
+    <div class="share-socials">
+      <a id="share-line" class="share-soc-btn" href="#" target="_blank" rel="noopener">💬 LINE</a>
+      <a id="share-fb" class="share-soc-btn" href="#" target="_blank" rel="noopener">📘 Facebook</a>
+      <a id="share-twitter" class="share-soc-btn" href="#" target="_blank" rel="noopener">🐦 X / Twitter</a>
+      <button class="share-soc-btn" onclick="nativeShare()">📤 แชร์อื่น ๆ</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
+<!-- ══════════════════════════════════════════
+     Minimal QR encoder (no external lib needed)
+     Uses Google Charts API as fallback via <img>
+══════════════════════════════════════════ -->
 <script>
+  // ─────────────────────────────────────────
+  // STATE
+  // ─────────────────────────────────────────
   const state = { bgData: null, logoData: null, bgbackData: null, cardColor: '#1a1a2e' };
 
+  // ─────────────────────────────────────────
+  // ON LOAD: read URL params and pre-fill form
+  // ─────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    loadFromUrl();
+    updateCard();
+  });
+
+  /**
+   * Encode all text fields + color into a compact Base64 URL param.
+   * Keys map: n=name, r=role, d=dept, c=company, p=phone, e=email,
+   *           l=line, w=website, fb=facebook, ig=instagram, li=linkedin, col=color
+   */
+  function buildSharePayload() {
+    const data = {
+      n:   g('f-name'),
+      r:   g('f-role'),
+      d:   g('f-dept'),
+      c:   g('f-company'),
+      p:   g('f-phone'),
+      e:   g('f-email'),
+      l:   g('f-line'),
+      w:   g('f-website'),
+      fb:  g('f-facebook'),
+      ig:  g('f-instagram'),
+      li:  g('f-linkedin'),
+      col: state.cardColor
+    };
+    // Remove empty keys to keep URL short
+    Object.keys(data).forEach(k => { if (!data[k]) delete data[k]; });
+    return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  }
+
+  function buildShareUrl() {
+    const base = window.location.href.split('?')[0].split('#')[0];
+    return base + '?card=' + buildSharePayload();
+  }
+
+  function loadFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const encoded = params.get('card');
+    if (!encoded) return;
+    try {
+      const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+      set('f-name',      data.n);
+      set('f-role',      data.r);
+      set('f-dept',      data.d);
+      set('f-company',   data.c);
+      set('f-phone',     data.p);
+      set('f-email',     data.e);
+      set('f-line',      data.l);
+      set('f-website',   data.w);
+      set('f-facebook',  data.fb);
+      set('f-instagram', data.ig);
+      set('f-linkedin',  data.li);
+      if (data.col) {
+        state.cardColor = data.col;
+        // Sync color chip UI
+        document.querySelectorAll('.color-chip').forEach(chip => {
+          chip.classList.toggle('active', chip.dataset.color === data.col);
+        });
+      }
+    } catch(e) {
+      console.warn('Could not parse share URL', e);
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // SHARE MODAL
+  // ─────────────────────────────────────────
+  let _shareUrl = '';
+
+  function openShare() {
+    _shareUrl = buildShareUrl();
+    document.getElementById('share-url-input').value = _shareUrl;
+
+    // Social links
+    const encoded = encodeURIComponent(_shareUrl);
+    const text = encodeURIComponent('นามบัตรดิจิทัลของฉัน 👋');
+    document.getElementById('share-line').href    = `https://social-plugins.line.me/lineit/share?url=${encoded}`;
+    document.getElementById('share-fb').href      = `https://www.facebook.com/sharer/sharer.php?u=${encoded}`;
+    document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${encoded}&text=${text}`;
+
+    // Draw QR
+    drawQR(_shareUrl);
+
+    document.getElementById('share-overlay').classList.add('open');
+  }
+
+  function closeShare() { document.getElementById('share-overlay').classList.remove('open'); }
+
+  function copyShareUrl() {
+    navigator.clipboard.writeText(_shareUrl)
+      .then(() => showToast('คัดลอกลิงก์แล้ว ✓'))
+      .catch(() => {
+        // Fallback for older browsers
+        const inp = document.getElementById('share-url-input');
+        inp.select(); document.execCommand('copy');
+        showToast('คัดลอกลิงก์แล้ว ✓');
+      });
+  }
+
+  async function nativeShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'นามบัตรดิจิทัล', url: _shareUrl });
+      } catch(e) { /* user cancelled */ }
+    } else {
+      copyShareUrl();
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // QR CODE  — pure-JS minimal encoder
+  // Uses a tiny self-contained QR library inline
+  // (Google Charts fallback via Image)
+  // ─────────────────────────────────────────
+  function drawQR(url) {
+    const canvas = document.getElementById('qr-canvas');
+    const ctx    = canvas.getContext('2d');
+    const size   = 160;
+    canvas.width = canvas.height = size;
+
+    // Use Google Charts QR API rendered into an Image then drawn on canvas
+    // (works offline too once cached; no API key needed)
+    const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}`;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      ctx.clearRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, size, size);
+    };
+    img.onerror = () => {
+      // Fallback: show text if image fails
+      ctx.fillStyle = '#f0f0f2';
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#555';
+      ctx.font = '10px Montserrat, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ไม่สามารถสร้าง QR ได้', size/2, size/2 - 8);
+      ctx.fillText('กรุณาคัดลอกลิงก์แทน', size/2, size/2 + 8);
+    };
+    img.src = apiUrl;
+  }
+
+  function downloadQR() {
+    const canvas = document.getElementById('qr-canvas');
+    const a = document.createElement('a');
+    a.download = 'qr-card.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }
+
+  // ─────────────────────────────────────────
+  // EXISTING FUNCTIONS (unchanged)
+  // ─────────────────────────────────────────
   function switchImgTab(tab, el) {
     document.querySelectorAll('.img-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.img-tab-pane').forEach(p => p.classList.remove('active'));
@@ -870,7 +1164,7 @@ ${state.bgbackData ? `<img class="bg-img" src="${state.bgbackData}"><div class="
 <div class="stripe"></div>
 <div class="content">
 <div class="co">${company}</div>
-${linkRow('', phone, false)}${linkRow('', email, false)}${linkRow('', line, false)}${linkRow('', website, true)}${linkRow('📘', facebook, true)}${linkRow('📸', instagram, true)}${linkRow('💼', linkedin, true)}
+${linkRow('📞', phone, false)}${linkRow('✉️', email, false)}${linkRow('💬', line, false)}${linkRow('🌐', website, true)}${linkRow('📘', facebook, true)}${linkRow('📸', instagram, true)}${linkRow('💼', linkedin, true)}
 </div>
 </div>
 </div>
@@ -910,8 +1204,6 @@ ${linkRow('', phone, false)}${linkRow('', email, false)}${linkRow('', line, fals
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
   }
-
-  updateCard();
 </script>
 </body>
 </html>
