@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Employee Card Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface2: #f0f0f2;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.18);
+    --highlight: #2563eb;
+    --highlight-light: rgba(37,99,235,0.08);
+    --text: #111111;
+    --text-muted: rgba(17,17,17,0.5);
+    --text-dim: rgba(17,17,17,0.28);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .page-wrap {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  .brand-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .brand-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .header-badge {
+    background: var(--text);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.25rem;
+  }
+
+  .panel:last-child { margin-bottom: 0; }
+
+  .panel-header {
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--highlight);
+    flex-shrink: 0;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .panel-body { padding: 1.25rem; }
+
+  /* Upload Zone */
+  .upload-zone {
+    border: 1.5px dashed var(--border-hover);
+    border-radius: var(--radius-sm);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-zone:hover { border-color: var(--highlight); background: var(--highlight-light); }
+  .upload-zone.dragover { border-color: var(--highlight); background: var(--highlight-light); transform: scale(1.01); }
+
+  .upload-zone input[type="file"] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+  }
+
+  .upload-icon {
+    width: 36px; height: 36px;
+    margin: 0 auto 8px;
+    border-radius: 10px;
+    background: rgba(37,99,235,0.1);
+    display: flex; align-items: center;
+    justify-content: center; font-size: 16px;
+  }
+
+  .upload-main-text { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .upload-sub-text { font-size: 10px; color: var(--text-muted); letter-spacing: 0.03em; }
+
+  .preview-img-wrap {
+    display: none; position: relative;
+    border-radius: var(--radius-sm); overflow: hidden;
+    background: var(--surface2); margin-top: 10px;
+  }
+
+  .preview-img-wrap img { width: 100%; height: 120px; object-fit: cover; display: block; }
+
+  .preview-remove {
+    position: absolute; top: 7px; right: 7px;
+    background: rgba(0,0,0,0.65); color: #fff;
+    border: none; border-radius: 50%;
+    width: 24px; height: 24px; font-size: 12px;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+  }
+
+  .upload-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .upload-label-text {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-muted); margin-bottom: 6px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  /* Image tabs */
+  .img-tabs { display: flex; gap: 6px; margin-bottom: 1rem; }
+  .img-tab {
+    flex: 1; padding: 7px 10px; text-align: center;
+    font-size: 10px; font-weight: 700;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    cursor: pointer; background: var(--surface2);
+    color: var(--text-muted); transition: all 0.15s;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .img-tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+  .img-tab-pane { display: none; }
+  .img-tab-pane.active { display: block; }
+
+  /* Form */
+  .field-group { margin-bottom: 1rem; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+
+  label.field-label {
+    display: block; font-size: 10px; font-weight: 700;
+    color: var(--text-muted); margin-bottom: 5px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  input[type="text"], input[type="email"], input[type="tel"], input[type="url"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px; padding: 9px 12px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  input:focus { border-color: var(--highlight); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); background: var(--surface); }
+
+  .sec-divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+
+  .sec-label {
+    font-size: 10px; font-weight: 700;
+    color: var(--text-muted); letter-spacing: .07em;
+    text-transform: uppercase; margin-bottom: .875rem;
+  }
+
+  /* Color picker */
+  .color-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .color-chip {
+    width: 28px; height: 28px; border-radius: 50%;
+    cursor: pointer; border: 2.5px solid transparent;
+    transition: all 0.2s; outline: 2px solid transparent;
+  }
+  .color-chip.active { border-color: var(--text); outline-color: rgba(0,0,0,0.18); }
+  .color-chip:hover { transform: scale(1.12); }
+
+  /* Card preview */
+  .card-preview-wrap { position: sticky; top: 1.5rem; }
+
+  .card-scene {
+    width: 100%; aspect-ratio: 1.75;
+    perspective: 1000px; cursor: pointer; margin-bottom: 12px;
+  }
+
+  .card-3d {
+    width: 100%; height: 100%;
+    position: relative; transform-style: preserve-3d;
+    transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .card-3d.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden; border-radius: 12px; overflow: hidden;
+  }
+
+  .card-back-face { transform: rotateY(180deg); }
+
+  /* Front */
+  .front-bg {
+    width: 100%; height: 100%; position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  }
+
+  .front-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  .front-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.1) 55%, transparent 100%); }
+  .front-stripe { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent); z-index: 3; }
+
+  .front-logo {
+    position: absolute; top: 13px; right: 13px;
+    width: 36px; height: 36px; border-radius: 50%;
+    object-fit: cover; border: 1.5px solid rgba(255,255,255,0.45);
+    display: none; z-index: 3;
+  }
+
+  .front-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 16px; z-index: 2; }
+  .front-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 3px; line-height: 1.2; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+  .front-role { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.72); letter-spacing: 0.04em; }
+
+  /* Back */
+  .back-face-inner {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 18px 20px; gap: 7px; position: relative;
+  }
+
+  .back-stripe { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); z-index: 3; }
+  .back-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; z-index: 0; }
+  .back-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.52); z-index: 1; display: none; }
+  .back-content { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 7px; }
+
+  .back-company { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: 0.01em; }
+  .back-row { display: flex; align-items: center; gap: 9px; font-size: 11px; color: rgba(255,255,255,0.85); font-weight: 400; }
+  .back-row a { color: rgba(255,255,255,0.85); text-decoration: none; }
+
+  .back-icon {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; flex-shrink: 0;
+    border: 0.5px solid rgba(255,255,255,0.2);
+  }
+
+  .flip-hint {
+    text-align: center; font-size: 10px;
+    color: var(--text-dim); letter-spacing: 0.07em;
+    text-transform: uppercase; margin-bottom: 1rem; font-weight: 600;
+  }
+
+  .btn-generate {
+    width: 100%; padding: 12px;
+    background: var(--text); color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px; font-weight: 700;
+    border: none; border-radius: var(--radius-sm);
+    cursor: pointer; letter-spacing: 0.06em;
+    text-transform: uppercase; transition: all 0.2s;
+  }
+
+  .btn-generate:hover { background: #333; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+  .btn-generate:active { transform: translateY(0); }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 100;
+    align-items: center; justify-content: center;
+    padding: 1.5rem; backdrop-filter: blur(6px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); width: 100%; max-width: 580px;
+    max-height: 88vh; overflow-y: auto; padding: 1.5rem;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+  }
+
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+  .modal-title { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+
+  .modal-close {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); width: 28px; height: 28px;
+    border-radius: 50%; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .code-wrap {
+    background: #111; border-radius: var(--radius-sm); padding: 1rem;
+    font-family: 'Courier New', monospace; font-size: 10.5px;
+    color: #7dd3fc; max-height: 200px; overflow-y: auto;
+    white-space: pre; overflow-x: auto; margin-bottom: 1rem; line-height: 1.6;
+  }
+
+  .btn-row { display: flex; gap: 10px; }
+
+  .btn-outline {
+    flex: 1; padding: 10px; background: transparent;
+    border: 1px solid var(--border-hover); color: var(--text);
+    font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+    border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
+  .btn-outline:hover { background: var(--surface2); }
+
+  .btn-primary {
+    flex: 1; padding: 10px; background: var(--text); color: #fff;
+    font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+    border: none; border-radius: var(--radius-sm); cursor: pointer;
+    transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
+  .btn-primary:hover { background: #333; }
+
+  .steps-list { margin-top: 1.25rem; display: flex; flex-direction: column; gap: 8px; }
+
+  .step-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 12px; background: var(--surface2);
+    border-radius: var(--radius-sm); border: 1px solid var(--border);
+    font-size: 12px; color: var(--text-muted);
+  }
+
+  .step-num {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--text); color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  .step-text code {
+    background: rgba(37,99,235,0.08); padding: 1px 5px;
+    border-radius: 3px; font-size: 11px; color: var(--highlight);
+  }
+
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text); color: #fff;
+    padding: 10px 20px; border-radius: 30px;
+    font-size: 12px; font-weight: 600; z-index: 999;
+    transition: transform 0.3s ease; pointer-events: none;
+    letter-spacing: 0.03em;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <header>
+    <div>
+      <div class="brand-title">Digital Card Builder</div>
+      <div class="brand-sub">สร้างบัตรพนักงานดิจิทัล · Flip Card</div>
+    </div>
+    <div class="header-badge">v2.0</div>
+  </header>
+
+  <div class="layout">
+    <!-- LEFT -->
+    <div>
+
+      <!-- Upload Images -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-dot"></div>
+          <div class="panel-title">รูปภาพ</div>
+        </div>
+        <div class="panel-body">
+          <div class="img-tabs">
+            <div class="img-tab active" onclick="switchImgTab('front',this)">หน้าการ์ด (Front)</div>
+            <div class="img-tab" onclick="switchImgTab('back',this)">หลังการ์ด (Back)</div>
+          </div>
+
+          <!-- Front images -->
+          <div class="img-tab-pane active" id="tab-front">
+            <div class="upload-grid-2">
+              <div>
+                <div class="upload-label-text">รูปพื้นหลัง</div>
+                <div class="upload-zone" id="zone-bg"
+                     ondragover="handleDrag(event,'zone-bg')"
+                     ondragleave="handleDragLeave(event,'zone-bg')"
+                     ondrop="handleDrop(event,'bg')">
+                  <input type="file" accept="image/*" id="input-bg" onchange="handleFile(this,'bg')">
+                  <div class="upload-icon"></div>
+                  <div class="upload-main-text">คลิก / ลากรูป</div>
+                  <div class="upload-sub-text">JPG · PNG · WEBP</div>
+                </div>
+                <div class="preview-img-wrap" id="wrap-bg">
+                  <img id="preview-bg" alt="">
+                  <button class="preview-remove" onclick="removeImage('bg')">✕</button>
+                </div>
+              </div>
+              <div>
+                <div class="upload-label-text">โลโก้บริษัท</div>
+                <div class="upload-zone" id="zone-logo"
+                     ondragover="handleDrag(event,'zone-logo')"
+                     ondragleave="handleDragLeave(event,'zone-logo')"
+                     ondrop="handleDrop(event,'logo')">
+                  <input type="file" accept="image/*" id="input-logo" onchange="handleFile(this,'logo')">
+                  <div class="upload-icon"></div>
+                  <div class="upload-main-text">คลิก / ลากโลโก้</div>
+                  <div class="upload-sub-text">PNG แนะนำ</div>
+                </div>
+                <div class="preview-img-wrap" id="wrap-logo">
+                  <img id="preview-logo" alt="" style="object-fit:contain;">
+                  <button class="preview-remove" onclick="removeImage('logo')">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Back image -->
+          <div class="img-tab-pane" id="tab-back">
+            <div class="upload-label-text">รูปพื้นหลัง (หลังการ์ด)</div>
+            <div class="upload-zone" id="zone-bgback"
+                 ondragover="handleDrag(event,'zone-bgback')"
+                 ondragleave="handleDragLeave(event,'zone-bgback')"
+                 ondrop="handleDrop(event,'bgback')">
+              <input type="file" accept="image/*" id="input-bgback" onchange="handleFile(this,'bgback')">
+              <div class="upload-icon"></div>
+              <div class="upload-main-text">คลิกหรือลากรูปพื้นหลัง (หลังการ์ด)</div>
+              <div class="upload-sub-text">รูปจะถูกเพิ่ม overlay สีดำอัตโนมัติเพื่อให้อ่านข้อความได้ชัดเจน</div>
+            </div>
+            <div class="preview-img-wrap" id="wrap-bgback">
+              <img id="preview-bgback" alt="">
+              <button class="preview-remove" onclick="removeImage('bgback')">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employee Info -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-dot"></div>
+          <div class="panel-title">ข้อมูลพนักงาน</div>
+        </div>
+        <div class="panel-body">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">ชื่อ-นามสกุล</label>
+              <input type="text" id="f-name" value="สมชาย ใจดี" oninput="updateCard()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">ตำแหน่ง</label>
+              <input type="text" id="f-role" value="Sales Manager" oninput="updateCard()">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">แผนก</label>
+              <input type="text" id="f-dept" value="Sales" oninput="updateCard()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">บริษัท</label>
+              <input type="text" id="f-company" value="ABC Company" oninput="updateCard()">
+            </div>
+          </div>
+
+          <div class="sec-divider"></div>
+          <div class="sec-label">ช่องทางติดต่อ</div>
+
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label"> เบอร์โทร</label>
+              <input type="tel" id="f-phone" value="081-234-5678" oninput="updateCard()">
+            </div>
+            <div class="field-group">
+              <label class="field-label"> อีเมล</label>
+              <input type="email" id="f-email" value="somchai@abc.com" oninput="updateCard()">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label"> LINE ID</label>
+              <input type="text" id="f-line" value="@somchai.abc" oninput="updateCard()">
+            </div>
+            <div class="field-group">
+              <label class="field-label"> เว็บไซต์</label>
+              <input type="url" id="f-website" placeholder="https://example.com" oninput="updateCard()">
+            </div>
+          </div>
+
+          <div class="sec-divider"></div>
+          <div class="sec-label">ลิงก์โซเชียล (ไม่บังคับ)</div>
+
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label"> Facebook</label>
+              <input type="url" id="f-facebook" placeholder="https://facebook.com/..." oninput="updateCard()">
+            </div>
+            <div class="field-group">
+              <label class="field-label"> Instagram</label>
+              <input type="url" id="f-instagram" placeholder="https://instagram.com/..." oninput="updateCard()">
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">LinkedIn</label>
+            <input type="url" id="f-linkedin" placeholder="https://linkedin.com/in/..." oninput="updateCard()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Card color -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-dot"></div>
+          <div class="panel-title">สีการ์ด (ใช้เมื่อไม่มีรูปพื้นหลัง)</div>
+        </div>
+        <div class="panel-body">
+          <div class="color-grid" id="color-grid">
+            <div class="color-chip active" style="background:#1a1a2e" data-color="#1a1a2e" onclick="pickColor(this)"></div>
+            <div class="color-chip" style="background:#0f3460" data-color="#0f3460" onclick="pickColor(this)"></div>
+            <div class="color-chip" style="background:#185FA5" data-color="#185FA5" onclick="pickColor(this)"></div>
+            <div class="color-chip" style="background:#0F6E56" data-color="#0F6E56" onclick="pickColor(this)"></div>
+            <div class="color-chip" style="background:#533BA7" data-color="#533BA7" onclick="pickColor(this)"></div>
+            <div class="color-chip" style="background:#993556" data-color="#993556" onclick="pickColor(this)"></div>
+            <div class="color-chip" style="background:#7a3800" data-color="#7a3800" onclick="pickColor(this)"></div>
+            <div class="color-chip" style="background:#2d2d2d" data-color="#2d2d2d" onclick="pickColor(this)"></div>
+            <div class="color-chip" style="background:#111111" data-color="#111111" onclick="pickColor(this)"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Preview -->
+    <div class="card-preview-wrap">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-dot"></div>
+          <div class="panel-title">ตัวอย่างการ์ด · คลิกเพื่อพลิก</div>
+        </div>
+        <div class="panel-body">
+
+          <div class="card-scene" onclick="document.getElementById('card3d').classList.toggle('flipped')">
+            <div class="card-3d" id="card3d">
+
+              <!-- FRONT -->
+              <div class="card-face card-front-face">
+                <div class="front-bg" id="card-front-bg">
+                  <img class="front-bg-img" id="card-bg-img" alt="">
+                  <div class="front-overlay"></div>
+                  <div class="front-stripe"></div>
+                  <img class="front-logo" id="card-logo-img" alt="">
+                  <div class="front-info">
+                    <div class="front-name" id="cv-name">สมชาย ใจดี</div>
+                    <div class="front-role" id="cv-role">Sales Manager · Sales</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BACK -->
+              <div class="card-face card-back-face">
+                <div class="back-face-inner" id="card-back-bg" style="background:#1a1a2e">
+                  <img class="back-bg-img" id="card-bgback-img" alt="">
+                  <div class="back-overlay" id="card-back-overlay"></div>
+                  <div class="back-stripe"></div>
+                  <div class="back-content">
+                    <div class="back-company" id="cv-company">ABC Company</div>
+                    <div class="back-row"><div class="back-icon"></div><span id="cv-phone">081-234-5678</span></div>
+                    <div class="back-row"><div class="back-icon"></div><span id="cv-email">somchai@abc.com</span></div>
+                    <div class="back-row"><div class="back-icon"></div><span id="cv-line">@somchai.abc</span></div>
+                    <div class="back-row" id="row-website" style="display:none"><div class="back-icon"></div><span id="cv-website"></span></div>
+                    <div class="back-row" id="row-facebook" style="display:none"><div class="back-icon"></div><span id="cv-facebook"></span></div>
+                    <div class="back-row" id="row-instagram" style="display:none"><div class="back-icon"></div><span id="cv-instagram"></span></div>
+                    <div class="back-row" id="row-linkedin" style="display:none"><div class="back-icon"></div><span id="cv-linkedin"></span></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="flip-hint">Tap to flip · คลิกเพื่อพลิกการ์ด</div>
+          <button class="btn-generate" onclick="openExport()">สร้าง HTML + ดาวน์โหลด</button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeExport()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">โค้ด HTML สำเร็จรูป</div>
+      <button class="modal-close" onclick="closeExport()">✕</button>
+    </div>
+    <div class="code-wrap" id="export-code-block"></div>
+    <div class="btn-row">
+      <button class="btn-outline" onclick="copyCode()">คัดลอกโค้ด</button>
+      <button class="btn-primary" onclick="downloadCode()">⬇ ดาวน์โหลด index.html</button>
+    </div>
+    <div class="steps-list">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text">สร้าง Repository บน GitHub ตั้งชื่อ <code>employee-card</code> เลือก Public</div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text">อัพโหลดไฟล์ <code>index.html</code> เข้า Repository</div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text">Settings → Pages → Source → <code>main branch</code> → Save</div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text">รอ 1-2 นาที เว็บออนไลน์ที่ <code>username.github.io/employee-card</code></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const state = { bgData: null, logoData: null, bgbackData: null, cardColor: '#1a1a2e' };
+
+  function switchImgTab(tab, el) {
+    document.querySelectorAll('.img-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.img-tab-pane').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+
+  function handleFile(input, type) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      state[type + 'Data'] = e.target.result;
+      document.getElementById('preview-' + type).src = e.target.result;
+      document.getElementById('wrap-' + type).style.display = 'block';
+      updateCard();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImage(type) {
+    state[type + 'Data'] = null;
+    document.getElementById('preview-' + type).src = '';
+    document.getElementById('wrap-' + type).style.display = 'none';
+    document.getElementById('input-' + type).value = '';
+    updateCard();
+  }
+
+  function handleDrag(e, zoneId) { e.preventDefault(); document.getElementById(zoneId).classList.add('dragover'); }
+  function handleDragLeave(e, zoneId) { document.getElementById(zoneId).classList.remove('dragover'); }
+
+  function handleDrop(e, type) {
+    e.preventDefault();
+    document.getElementById('zone-' + type).classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      state[type + 'Data'] = ev.target.result;
+      document.getElementById('preview-' + type).src = ev.target.result;
+      document.getElementById('wrap-' + type).style.display = 'block';
+      updateCard();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function pickColor(el) {
+    document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    state.cardColor = el.dataset.color;
+    updateCard();
+  }
+
+  function g(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+  function setRow(rowId, spanId, val, isLink) {
+    const row = document.getElementById(rowId);
+    const span = document.getElementById(spanId);
+    if (!row || !span) return;
+    if (val) {
+      row.style.display = 'flex';
+      span.textContent = isLink ? val.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : val;
+    } else {
+      row.style.display = 'none';
+    }
+  }
+
+  function updateCard() {
+    const name = g('f-name'), role = g('f-role'), dept = g('f-dept'),
+          company = g('f-company'), phone = g('f-phone'),
+          email = g('f-email'), line = g('f-line'),
+          website = g('f-website'), facebook = g('f-facebook'),
+          instagram = g('f-instagram'), linkedin = g('f-linkedin');
+
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    set('cv-name', name || 'ชื่อ-นามสกุล');
+    set('cv-role', [role, dept].filter(Boolean).join(' · ') || 'ตำแหน่ง');
+    set('cv-company', company || 'บริษัท');
+    set('cv-phone', phone);
+    set('cv-email', email);
+    set('cv-line', line);
+
+    setRow('row-website',   'cv-website',   website,   true);
+    setRow('row-facebook',  'cv-facebook',  facebook,  true);
+    setRow('row-instagram', 'cv-instagram', instagram, true);
+    setRow('row-linkedin',  'cv-linkedin',  linkedin,  true);
+
+    const backBg = document.getElementById('card-back-bg');
+    if (backBg) backBg.style.background = state.bgbackData ? '#000' : state.cardColor;
+
+    const bgImg = document.getElementById('card-bg-img');
+    if (state.bgData) { bgImg.src = state.bgData; bgImg.style.display = 'block'; }
+    else { bgImg.src = ''; bgImg.style.display = 'none'; }
+
+    const logoImg = document.getElementById('card-logo-img');
+    if (state.logoData) { logoImg.src = state.logoData; logoImg.style.display = 'block'; }
+    else { logoImg.src = ''; logoImg.style.display = 'none'; }
+
+    const bgbackImg = document.getElementById('card-bgback-img');
+    const backOverlay = document.getElementById('card-back-overlay');
+    if (state.bgbackData) {
+      bgbackImg.src = state.bgbackData; bgbackImg.style.display = 'block';
+      backOverlay.style.display = 'block';
+    } else {
+      bgbackImg.src = ''; bgbackImg.style.display = 'none';
+      backOverlay.style.display = 'none';
+    }
+  }
+
+  function generateHTML() {
+    const name = g('f-name'), role = g('f-role'), dept = g('f-dept'),
+          company = g('f-company'), phone = g('f-phone'),
+          email = g('f-email'), line = g('f-line'),
+          website = g('f-website'), facebook = g('f-facebook'),
+          instagram = g('f-instagram'), linkedin = g('f-linkedin'),
+          color = state.cardColor;
+
+    const shortUrl = url => url ? url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : '';
+
+    const linkRow = (icon, val, isLink) => {
+      if (!val) return '';
+      const display = isLink ? shortUrl(val) : val;
+      const inner = isLink
+        ? `<a href="${val}" target="_blank" rel="noopener" style="color:rgba(255,255,255,.85);text-decoration:none;">${display}</a>`
+        : display;
+      return `\n<div class="row"><div class="ic">${icon}</div>${inner}</div>`;
+    };
+
+    return `<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Card - ${name}</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { min-height:100vh; display:flex; flex-direction:column; align-items:center;
+       justify-content:center; background:#f5f5f7; font-family:'Montserrat',sans-serif; padding:2rem; }
+.scene { width:340px; height:200px; perspective:1000px; cursor:pointer; }
+.card { width:100%; height:100%; position:relative; transform-style:preserve-3d;
+        transition:transform .65s cubic-bezier(.4,0,.2,1); border-radius:12px;
+        box-shadow:0 16px 48px rgba(0,0,0,.22); }
+.card.flipped { transform:rotateY(180deg); }
+.face { position:absolute; width:100%; height:100%;
+        backface-visibility:hidden; border-radius:12px; overflow:hidden; }
+.back-face { transform:rotateY(180deg); }
+.front-inner { width:100%; height:100%; position:relative;
+               background:${state.bgData ? '#000' : color}; }
+.front-inner .bg-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover; }
+.front-inner .ov { position:absolute;inset:0;
+                   background:linear-gradient(to top,rgba(0,0,0,.82) 0%,rgba(0,0,0,.1) 55%,transparent 100%); }
+.stripe { position:absolute;top:0;left:0;right:0;height:3px;
+          background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);z-index:3; }
+.logo-img { position:absolute;top:13px;right:13px;z-index:3;width:36px;height:36px;
+            border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.4); }
+.info { position:absolute;bottom:0;left:0;right:0;padding:14px 16px;z-index:2; }
+.info .nm { font-size:16px;font-weight:700;color:#fff;margin-bottom:3px;
+            text-shadow:0 1px 4px rgba(0,0,0,.4); }
+.info .rl { font-size:10px;font-weight:500;color:rgba(255,255,255,.72);letter-spacing:.04em; }
+.back-inner { width:100%;height:100%;display:flex;flex-direction:column;
+              justify-content:center;padding:18px 20px;gap:7px;
+              background:${state.bgbackData ? '#000' : color};position:relative; }
+.back-inner .bg-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0; }
+.back-inner .ov { position:absolute;inset:0;background:rgba(0,0,0,.52);z-index:1; }
+.content { position:relative;z-index:2;display:flex;flex-direction:column;gap:7px; }
+.co { font-size:13px;font-weight:700;color:#fff;margin-bottom:4px; }
+.row { display:flex;align-items:center;gap:9px;font-size:11px;color:rgba(255,255,255,.85); }
+.ic { width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.12);
+      display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;
+      border:.5px solid rgba(255,255,255,.2); }
+p.hint { margin-top:14px;font-size:10px;font-weight:600;color:#999;
+         letter-spacing:.07em;text-align:center;text-transform:uppercase; }
+</style>
+</head>
+<body>
+<div class="scene" onclick="this.querySelector('.card').classList.toggle('flipped')">
+<div class="card">
+<div class="face front-face">
+<div class="front-inner">
+${state.bgData ? `<img class="bg-img" src="${state.bgData}">` : ''}
+<div class="ov"></div><div class="stripe"></div>
+${state.logoData ? `<img class="logo-img" src="${state.logoData}">` : ''}
+<div class="info">
+<div class="nm">${name}</div>
+<div class="rl">${[role, dept].filter(Boolean).join(' · ')}</div>
+</div>
+</div>
+</div>
+<div class="face back-face">
+<div class="back-inner">
+${state.bgbackData ? `<img class="bg-img" src="${state.bgbackData}"><div class="ov"></div>` : ''}
+<div class="stripe"></div>
+<div class="content">
+<div class="co">${company}</div>
+${linkRow('', phone, false)}${linkRow('', email, false)}${linkRow('', line, false)}${linkRow('', website, true)}${linkRow('📘', facebook, true)}${linkRow('📸', instagram, true)}${linkRow('💼', linkedin, true)}
+</div>
+</div>
+</div>
+</div>
+</div>
+<p class="hint">Tap to flip · คลิกพลิกการ์ด</p>
+</body>
+</html>`;
+  }
+
+  let _code = '';
+
+  function openExport() {
+    _code = generateHTML();
+    document.getElementById('export-code-block').textContent = _code;
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeExport() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+  function copyCode() {
+    navigator.clipboard.writeText(_code).then(() => showToast('คัดลอกโค้ดแล้ว ✓'));
+  }
+
+  function downloadCode() {
+    const blob = new Blob([_code], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'index.html';
+    a.click();
+    showToast('ดาวน์โหลดแล้ว ✓');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  updateCard();
+</script>
+</body>
+</html>
