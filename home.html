@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home — Laptop Registry</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="home-container">
+    <header class="topbar">
+      <a href="home.html" class="logo">Laptop Registry</a>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <span class="user-label" id="userLabel">—</span>
+        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+      </div>
+    </header>
+
+    <section class="home-hero">
+      <div class="greeting">Dashboard</div>
+      <h2 id="welcomeMsg">Welcome.</h2>
+      <p class="subtitle">What would you like to do today?</p>
+    </section>
+
+    <div class="home-grid" id="homeGrid">
+      <!-- Cards injected by JS based on role -->
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading...</div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="java.js"></script>
+
+  <script>
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Read role from database
+      db.ref('users/' + user.uid).once('value').then(function(snap) {
+        setLoading(false);
+        const data = snap.val();
+        const role = data ? data.role : 'staff';
+        const name = data ? data.name : user.email;
+
+        document.getElementById('userLabel').textContent = role.toUpperCase();
+        document.getElementById('welcomeMsg').textContent = 'Good to have you, ' + (name || user.email) + '.';
+
+        renderCards(role);
+      }).catch(function() {
+        setLoading(false);
+        renderCards('staff');
+      });
+    });
+
+    function renderCards(role) {
+      const grid = document.getElementById('homeGrid');
+      let html = '';
+
+      // Admin only — Record Laptop
+      if (role === 'admin') {
+        html += `
+          <a href="form.html" class="home-card">
+            <div class="card-tag">Action</div>
+            <div class="card-title">Record Laptop</div>
+            <div class="card-desc">Add a new laptop entry to the database. Fill in full hardware specs and assignment details.</div>
+            <div class="card-arrow">Get started &rarr;</div>
+          </a>`;
+      }
+
+      // Everyone — Dashboard
+      html += `
+        <a href="dashboard.html" class="home-card">
+          <div class="card-tag">Overview</div>
+          <div class="card-title">Dashboard</div>
+          <div class="card-desc">View summary of all laptops by status, condition and availability.</div>
+          <div class="card-arrow">View dashboard &rarr;</div>
+        </a>`;
+
+      // Everyone — View Records
+      html += `
+        <a href="records.html" class="home-card">
+          <div class="card-tag">Database</div>
+          <div class="card-title">View Records</div>
+          <div class="card-desc">Browse all saved laptop entries from the database.</div>
+          <div class="card-arrow">View all &rarr;</div>
+        </a>`;
+
+      // Staff — no access message
+      if (role !== 'admin') {
+        html += `
+          <div class="home-card" style="opacity:0.5;cursor:not-allowed;">
+            <div class="card-tag">Restricted</div>
+            <div class="card-title">Record Laptop</div>
+            <div class="card-desc">Only administrators can add new laptop entries.</div>
+            <div class="card-arrow">No access</div>
+          </div>`;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    function handleLogout() {
+      firebase.auth().signOut().then(function() {
+        window.location.href = 'index.html';
+      });
+    }
+  </script>
+   <div class="footer-credit">
+  Developed by fw_techsupport
+</div>
+</body>
+</html>

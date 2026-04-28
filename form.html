@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Record Laptop — Laptop Registry</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="form-container">
+    <header class="form-topbar">
+      <a href="home.html" class="back-btn">&larr; Back</a>
+      <span class="sep">/</span>
+      <span class="page-title">New Laptop Entry</span>
+    </header>
+
+    <div class="form-body">
+      <div class="form-heading">
+        <h1>Record Laptop</h1>
+        <p>Fill in all relevant fields and submit to save to Firebase.</p>
+      </div>
+
+      <div id="laptopForm">
+
+        <div class="form-section">
+          <div class="section-label">Assignment</div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="assetTag">Asset Tag</label>
+              <input type="text" id="assetTag" placeholder="e.g. LT-00123" />
+            </div>
+            <div class="field">
+              <label for="assignedTo">Assigned To</label>
+              <input type="text" id="assignedTo" placeholder="Full name" />
+            </div>
+            <div class="field">
+              <label for="department">Department</label>
+              <input type="text" id="department" placeholder="e.g. Marketing" />
+            </div>
+            <div class="field">
+              <label for="dateAssigned">Date Assigned</label>
+              <input type="date" id="dateAssigned" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-label">Hardware Specifications</div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="brand">Brand</label>
+              <select id="brand">
+                <option value="">Select brand</option>
+                <option>Apple</option><option>Dell</option><option>HP</option>
+                <option>Lenovo</option><option>Asus</option><option>Acer</option>
+                <option>Microsoft</option><option>MSI</option><option>Samsung</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="model">Model</label>
+              <input type="text" id="model" placeholder="e.g. ThinkPad X1 Carbon" />
+            </div>
+            <div class="field">
+              <label for="serialNumber">Serial Number</label>
+              <input type="text" id="serialNumber" placeholder="e.g. SN/2024-XXXX" />
+            </div>
+            <div class="field">
+              <label for="os">Operating System</label>
+              <select id="os">
+                <option value="">Select OS</option>
+                <option>Windows 11</option><option>Windows 10</option>
+                <option>macOS Sequoia</option><option>macOS Sonoma</option>
+                <option>Ubuntu</option><option>Other Linux</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cpu">Processor (CPU)</label>
+              <input type="text" id="cpu" placeholder="e.g. Intel Core i7-1360P" />
+            </div>
+            <div class="field">
+              <label for="ram">RAM (GB)</label>
+              <input type="number" id="ram" placeholder="e.g. 16" min="1" />
+            </div>
+            <div class="field">
+              <label for="storage">Storage (GB)</label>
+              <input type="number" id="storage" placeholder="e.g. 512" min="1" />
+            </div>
+            <div class="field">
+              <label for="storageType">Storage Type</label>
+              <select id="storageType">
+                <option value="">Select type</option>
+                <option>SSD</option><option>HDD</option>
+                <option>NVMe SSD</option><option>eMMC</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="screenSize">Screen Size (inch)</label>
+              <input type="number" id="screenSize" placeholder="e.g. 14" step="0.1" />
+            </div>
+            <div class="field">
+              <label for="condition">Condition</label>
+              <select id="condition">
+                <option value="">Select condition</option>
+                <option>New</option><option>Good</option><option>Fair</option>
+                <option>Needs Repair</option><option>Decommissioned</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="availability">Availability</label>
+              <select id="availability">
+                <option value="">Select availability</option>
+                <option value="available">Available</option>
+                <option value="in_use">In Use</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-label">Additional Notes</div>
+          <div class="form-grid full">
+            <div class="field">
+              <label for="notes">Notes</label>
+              <textarea id="notes" placeholder="Any additional details, issues, or remarks..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-row">
+          <button class="submit-btn" id="submitBtn" onclick="submitForm()">Save to Database</button>
+          <button class="reset-btn" onclick="resetForm()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Saving...</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="java.js"></script>
+
+  <script>
+    // Guard: must be logged in AND must be admin
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      db.ref('users/' + user.uid + '/role').once('value').then(function(snap) {
+        if (snap.val() !== 'admin') {
+          // Not admin — redirect back to home
+          window.location.href = 'home.html';
+        }
+      });
+    });
+  </script>
+   <div class="footer-credit">
+  Developed by fw_techsupport
+</div>
+</body>
+</html>

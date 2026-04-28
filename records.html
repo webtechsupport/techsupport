@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Records — Laptop Registry</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .records-body {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 40px 80px;
+      width: 100%;
+    }
+    .records-heading {
+      margin-bottom: 32px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .records-heading h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--text-primary);
+    }
+    .records-count {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding-bottom: 6px;
+    }
+    .search-bar { margin-bottom: 24px; }
+    .search-bar input { width: 100%; max-width: 360px; }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead { background: var(--off-white); border-bottom: 1.5px solid var(--border); }
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      font-weight: 500;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--off-white); }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 100px;
+      border: 1.5px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .badge.new    { border-color: #27ae60; color: #27ae60; }
+    .badge.good   { border-color: #2980b9; color: #2980b9; }
+    .badge.fair   { border-color: #f39c12; color: #f39c12; }
+    .badge.repair     { border-color: #c0392b; color: #c0392b; }
+    .badge.available  { border-color: #27ae60; color: #27ae60; }
+    .badge.in-use     { border-color: #c0392b; color: #c0392b; }
+
+    /* Action buttons */
+    .btn-edit {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 6px;
+    }
+    .btn-edit:hover { border-color: var(--accent); }
+
+    .btn-delete {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #c0392b;
+      background: none;
+      border: 1.5px solid #e8c8c8;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-delete:hover { border-color: #c0392b; background: #fff5f5; }
+
+    .btn-save {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #fff;
+      background: var(--accent);
+      border: 1.5px solid var(--accent);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 6px;
+    }
+    .btn-cancel {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    /* Inline edit input */
+    .edit-input {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--white);
+      border: 1.5px solid var(--accent);
+      border-radius: 6px;
+      padding: 4px 8px;
+      width: 100px;
+      outline: none;
+    }
+
+    /* Confirm modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      max-width: 380px;
+      width: 90%;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-box h3 {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .modal-box p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .modal-actions { display: flex; gap: 12px; }
+    .modal-confirm {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #fff;
+      background: #c0392b;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 24px;
+      cursor: pointer;
+      flex: 1;
+    }
+    .modal-cancel {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 24px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .empty-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+    .empty-state .empty-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text-secondary); }
+    .empty-state p { font-size: 13px; }
+
+
+    /* Print styles */
+    .btn-print {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-print:hover {
+      border-color: var(--accent);
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 12mm;
+      }
+      .topbar,
+      .search-bar,
+      .btn-print,
+      .loading-overlay,
+      .modal-overlay,
+      .toast,
+      .btn-edit,
+      .btn-delete,
+      #actionHeader {
+        display: none !important;
+      }
+      body { background: white; }
+      .home-container { display: block; }
+      .records-body { padding: 0; max-width: 100%; }
+      .records-heading { margin-bottom: 16px; }
+      .table-wrap {
+        border: 1px solid #ccc;
+        border-radius: 0;
+        overflow: visible;
+      }
+      table { font-size: 10px; }
+      th { font-size: 8px; padding: 8px 10px; }
+      td { padding: 8px 10px; white-space: normal; }
+      .badge { border: 1px solid #ccc; }
+    }
+    @media (max-width: 640px) {
+      .records-body { padding: 32px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="home-container">
+    <header class="topbar">
+      <a href="home.html" class="logo">Laptop Registry</a>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <span class="user-label" id="userLabel">—</span>
+        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="records-body">
+      <div class="records-heading">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Database</div>
+          <h1>All Laptop Records</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="records-count" id="recordsCount">Loading...</div>
+          <button class="btn-print" id="printBtn" onclick="window.print()" style="display:none;">Print</button>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by brand, model, asset tag..." oninput="filterTable()" />
+      </div>
+
+      <div class="table-wrap" id="tableWrap">
+        <table id="recordsTable">
+          <thead>
+            <tr>
+              <th>Asset Tag</th>
+              <th>Brand</th>
+              <th>Model</th>
+              <th>Assigned To</th>
+              <th>Department</th>
+              <th>OS</th>
+              <th>CPU</th>
+              <th>RAM</th>
+              <th>Storage</th>
+              <th>Condition</th>
+              <th>Availability</th>
+              <th>Date</th>
+              <th>Recorded By</th>
+              <th id="actionHeader" style="display:none;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="empty-title">No records found</div>
+        <p>No laptop entries match your search.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+      <h3>Delete Record</h3>
+      <p>Are you sure you want to delete this laptop record? This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-confirm" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay active" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading records...</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="java.js"></script>
+
+  <script>
+    let allRows = [];
+    let currentRole = 'staff';
+    let deleteTargetId = null;
+
+    // Auth guard
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (!user) { window.location.href = 'index.html'; return; }
+
+      db.ref('users/' + user.uid).once('value').then(function(snap) {
+        const data = snap.val();
+        currentRole = data ? data.role : 'staff';
+        document.getElementById('userLabel').textContent = currentRole.toUpperCase();
+
+        // Show Actions column and Print button for admin only
+        if (currentRole === 'admin') {
+          document.getElementById('actionHeader').style.display = '';
+          document.getElementById('printBtn').style.display = '';
+        }
+      });
+
+      // Real-time load
+      db.ref('laptops').on('value', function(snap) {
+        setLoading(false);
+        const data = snap.val();
+
+        if (!data) {
+          document.getElementById('recordsCount').textContent = '0 Records';
+          document.getElementById('emptyState').style.display = 'block';
+          document.getElementById('tableWrap').style.display = 'none';
+          return;
+        }
+
+        allRows = Object.entries(data).map(function([key, val]) {
+          return { id: key, ...val };
+        });
+
+        allRows.sort(function(a, b) {
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+
+        document.getElementById('recordsCount').textContent = allRows.length + ' Record' + (allRows.length !== 1 ? 's' : '');
+        renderTable(allRows);
+      });
+    });
+
+    function renderTable(rows) {
+      const tbody   = document.getElementById('recordsBody');
+      const empty   = document.getElementById('emptyState');
+      const tableWrap = document.getElementById('tableWrap');
+
+      if (rows.length === 0) {
+        empty.style.display = 'block';
+        tableWrap.style.display = 'none';
+        return;
+      }
+
+      empty.style.display = 'none';
+      tableWrap.style.display = 'block';
+
+      const isAdmin = currentRole === 'admin';
+
+      tbody.innerHTML = rows.map(function(r) {
+        const condClass = { 'New':'new','Good':'good','Fair':'fair','Needs Repair':'repair' }[r.condition] || '';
+        const availClass = r.availability === 'available' ? 'available' : (r.availability === 'in_use' ? 'in-use' : '');
+        const availLabel = r.availability === 'available' ? 'Available' : (r.availability === 'in_use' ? 'In Use' : '—');
+        const date = r.dateAssigned || (r.timestamp ? r.timestamp.slice(0,10) : '—');
+        const actionCell = isAdmin ? `
+          <td>
+            <button class="btn-edit" onclick="startEdit('${r.id}')">Edit</button>
+            <button class="btn-delete" onclick="openDeleteModal('${r.id}')">Delete</button>
+          </td>` : '';
+
+        return `<tr id="row-${r.id}">
+          <td>${r.assetTag || '—'}</td>
+          <td>${r.brand || '—'}</td>
+          <td>${r.model || '—'}</td>
+          <td>${r.assignedTo || '—'}</td>
+          <td>${r.department || '—'}</td>
+          <td>${r.os || '—'}</td>
+          <td>${r.cpu || '—'}</td>
+          <td>${r.ram ? r.ram + ' GB' : '—'}</td>
+          <td>${r.storage ? r.storage + ' GB ' + (r.storageType || '') : '—'}</td>
+          <td><span class="badge ${condClass}">${r.condition || '—'}</span></td>
+          <td><span class="badge ${availClass}">${availLabel}</span></td>
+          <td>${date}</td>
+          <td>${r.recordedBy || '—'}</td>
+          ${actionCell}
+        </tr>`;
+      }).join('');
+    }
+
+    // ── EDIT ─────────────────────────────────────────────────────
+    function startEdit(id) {
+      const record = allRows.find(r => r.id === id);
+      if (!record) return;
+
+      const row = document.getElementById('row-' + id);
+      row.innerHTML = `
+        <td><input class="edit-input" id="e-assetTag" value="${record.assetTag || ''}" /></td>
+        <td><input class="edit-input" id="e-brand" value="${record.brand || ''}" /></td>
+        <td><input class="edit-input" id="e-model" style="width:130px;" value="${record.model || ''}" /></td>
+        <td><input class="edit-input" id="e-assignedTo" value="${record.assignedTo || ''}" /></td>
+        <td><input class="edit-input" id="e-department" value="${record.department || ''}" /></td>
+        <td><input class="edit-input" id="e-os" value="${record.os || ''}" /></td>
+        <td><input class="edit-input" id="e-cpu" style="width:130px;" value="${record.cpu || ''}" /></td>
+        <td><input class="edit-input" style="width:60px;" id="e-ram" value="${record.ram || ''}" /></td>
+        <td><input class="edit-input" style="width:70px;" id="e-storage" value="${record.storage || ''}" /></td>
+        <td>
+          <select class="edit-input" id="e-condition" style="width:130px;">
+            <option value="">Select</option>
+            <option value="New" ${record.condition === 'New' ? 'selected' : ''}>New</option>
+            <option value="Good" ${record.condition === 'Good' ? 'selected' : ''}>Good</option>
+            <option value="Fair" ${record.condition === 'Fair' ? 'selected' : ''}>Fair</option>
+            <option value="Needs Repair" ${record.condition === 'Needs Repair' ? 'selected' : ''}>Needs Repair</option>
+            <option value="Decommissioned" ${record.condition === 'Decommissioned' ? 'selected' : ''}>Decommissioned</option>
+          </select>
+        </td>
+        <td>
+          <select class="edit-input" id="e-availability" style="width:110px;">
+            <option value="">Select</option>
+            <option value="available" ${record.availability === 'available' ? 'selected' : ''}>Available</option>
+            <option value="in_use" ${record.availability === 'in_use' ? 'selected' : ''}>In Use</option>
+          </select>
+        </td>
+        <td><input class="edit-input" id="e-dateAssigned" value="${record.dateAssigned || ''}" /></td>
+        <td>${record.recordedBy || '—'}</td>
+        <td>
+          <button class="btn-save" onclick="saveEdit('${id}')">Save</button>
+          <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+        </td>`;
+    }
+
+    function cancelEdit() {
+      renderTable(allRows);
+    }
+
+    function saveEdit(id) {
+      const updated = {
+        assetTag:    document.getElementById('e-assetTag').value.trim(),
+        brand:       document.getElementById('e-brand').value.trim(),
+        model:       document.getElementById('e-model').value.trim(),
+        assignedTo:  document.getElementById('e-assignedTo').value.trim(),
+        department:  document.getElementById('e-department').value.trim(),
+        os:          document.getElementById('e-os').value.trim(),
+        cpu:         document.getElementById('e-cpu').value.trim(),
+        ram:         document.getElementById('e-ram').value.trim(),
+        storage:     document.getElementById('e-storage').value.trim(),
+        condition:    document.getElementById('e-condition').value.trim(),
+        availability: document.getElementById('e-availability') ? document.getElementById('e-availability').value : '',
+        dateAssigned:document.getElementById('e-dateAssigned').value.trim(),
+      };
+
+      db.ref('laptops/' + id).update(updated)
+        .then(function() { showToast('Updated successfully.'); })
+        .catch(function() { showToast('Update failed.', true); });
+    }
+
+    // ── DELETE ────────────────────────────────────────────────────
+    function openDeleteModal(id) {
+      deleteTargetId = id;
+      document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function closeModal() {
+      deleteTargetId = null;
+      document.getElementById('deleteModal').classList.remove('active');
+    }
+
+    function confirmDelete() {
+      if (!deleteTargetId) return;
+      db.ref('laptops/' + deleteTargetId).remove()
+        .then(function() {
+          closeModal();
+          showToast('Record deleted.');
+        })
+        .catch(function() {
+          closeModal();
+          showToast('Delete failed.', true);
+        });
+    }
+
+    // ── SEARCH ────────────────────────────────────────────────────
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      if (!q) {
+        renderTable(allRows);
+        document.getElementById('recordsCount').textContent = allRows.length + ' Record' + (allRows.length !== 1 ? 's' : '');
+        return;
+      }
+      const filtered = allRows.filter(function(r) {
+        return (
+          (r.assetTag  ||'').toLowerCase().includes(q) ||
+          (r.brand     ||'').toLowerCase().includes(q) ||
+          (r.model     ||'').toLowerCase().includes(q) ||
+          (r.assignedTo||'').toLowerCase().includes(q) ||
+          (r.department||'').toLowerCase().includes(q) ||
+          (r.condition ||'').toLowerCase().includes(q)
+        );
+      });
+      document.getElementById('recordsCount').textContent = filtered.length + ' Result' + (filtered.length !== 1 ? 's' : '');
+      renderTable(filtered);
+    }
+
+    function handleLogout() {
+      firebase.auth().signOut().then(function() {
+        window.location.href = 'index.html';
+      });
+    }
+  </script>
+   <div class="footer-credit">
+  Developed by fw_techsupport
+</div>
+</body>
+</html>
